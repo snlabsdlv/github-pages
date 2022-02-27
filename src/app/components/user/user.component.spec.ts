@@ -4,7 +4,10 @@ import {
   TestBed,
   tick,
 } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { GithubService } from 'src/app/services/github.service';
 
@@ -14,13 +17,40 @@ import { UserComponent } from './user.component';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatButtonModule } from '@angular/material/button';
-import { delay, of, Subscription } from 'rxjs';
+import { delay, of } from 'rxjs';
 
 describe('UserComponent', () => {
+  const mockUserData = [
+    {
+      id: 1,
+      login: 'mojombo',
+      avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4',
+      url: 'https://api.github.com/users/mojombo',
+    },
+    {
+      id: 2,
+      login: 'defunkt',
+      avatar_url: 'https://avatars.githubusercontent.com/u/2?v=4',
+      url: 'https://api.github.com/users/defunkt',
+    },
+    {
+      id: 3,
+      login: 'pjhyett',
+      avatar_url: 'https://avatars.githubusercontent.com/u/3?v=4',
+      url: 'https://api.github.com/users/pjhyett',
+    },
+    {
+      id: 4,
+      login: 'wycats',
+      avatar_url: 'https://avatars.githubusercontent.com/u/4?v=4',
+      url: 'https://api.github.com/users/wycats',
+    },
+  ];
   let component: UserComponent;
   let fixture: ComponentFixture<UserComponent>;
-  //  let githubService: GithubService;
   let user: User[] = [];
+  let githubService: GithubService;
+
   let githubServiceSpy: jasmine.SpyObj<GithubService>;
 
   beforeEach(async () => {
@@ -42,7 +72,7 @@ describe('UserComponent', () => {
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-   
+
     githubServiceSpy = TestBed.inject(
       GithubService
     ) as jasmine.SpyObj<GithubService>;
@@ -51,12 +81,6 @@ describe('UserComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('it should have button toggleDidStart === true ', () => {
-    const didStart = component.toggleDidStart;
-    expect(didStart).toEqual(true);
-  });
-
   it('ngOnit should be loaded', fakeAsync(() => {
     githubServiceSpy.getAllUsers.and.returnValue(of(user).pipe(delay(1)));
     fixture.detectChanges();
@@ -68,42 +92,80 @@ describe('UserComponent', () => {
       expect(githubServiceSpy.getAllUsers).toHaveBeenCalledWith();
     });
 
-    tick(1);
+    tick(1000);
     expect(component.timerRunning).toBeFalsy();
     expect(component.userData).toEqual(user);
   }));
 
-  it('expect data to have a length of 10 elements', fakeAsync(() => {
-    component.getUserData();
-    fixture.detectChanges();
+  it('it should have toggleStatus true(===true) ', () => {
+    const didStart = component.toggleDidStart;
+    expect(didStart).toEqual(true);
+  });
 
-    fixture.whenStable().then(() => {
-      expect(component.userData.length).toEqual(10);
-    });
+  it('it should have maxUserId a value', fakeAsync(() => {
+    spyOn(component, 'goForward');
+    component.goForward();
+    expect(component.goForward).toHaveBeenCalled();
+    tick(1000);
+    fixture.detectChanges();
+    expect(component.maxUserId).toBe(0);
   }));
 
-  it('it should have maxUserId a value', () => {
-    const userId = component.maxUserId;
+  it('it should have timerLabel counter at 0 when starting', fakeAsync(() => {
+    expect(component.labelTimerElapsed).toBe('0');
+    const elapsedTimer =
+      fixture.debugElement.nativeElement.querySelector('#timerLabel');
+    tick(1000);
+    expect(elapsedTimer.innerHTML).toBe('0');
+  }));
+
+  it('it should have timerLabel counter at 0 when stopped', fakeAsync(() => {
+    expect(component.labelTimerElapsed).toBe('0');
+    const elapsedTimer =
+      fixture.debugElement.nativeElement.querySelector('#timerLabel');
+    let buttonStop =
+      fixture.debugElement.nativeElement.querySelector('#toggleButton');
+    buttonStop.click();
+    tick(1000);
+    expect(elapsedTimer.innerHTML).toBe('0');
+  }));
+
+  it('it should contain a userName', fakeAsync(() => {
+    component.userData = mockUserData;
+    tick(1000);
     fixture.detectChanges();
+    const userTitle =
+      fixture.debugElement.nativeElement.querySelector('#userTitle');
+    expect(userTitle.innerHTML).toBe(mockUserData[0].login);
+  }));
 
-    fixture.whenStable().then(() => {
-      expect(userId).not.toBeNull();
-    });
-  });
-  // it('it should have timer running', async () => {
-  //   const subscription = component.timerSubscription;
-  //   await fixture.whenStable().then(() => {
-  //     fixture.detectChanges();
-  //     expect(userId).toEqual(0);
-  //   });
-  // });
+  it('it should have an image for the first user', fakeAsync(() => {
+    component.userData = mockUserData;
+    tick(1000);
+    fixture.detectChanges();
+    const userImg =
+      fixture.debugElement.nativeElement.querySelector('#userImg');
 
-  // it('it should unsubscribe', async (done: DoneFn) => {
-  //   const unsubcribe = spyOn(Subscription.prototype, 'unsubscribe');
-  //   fixture.whenStable().then(() => {
-  //     component.ngOnDestroy();
-  //     expect(unsubcribe).toHaveBeenCalledTimes(1);
-  //     done();
-  //   });
-  // });
+    expect(userImg.src).toBe(mockUserData[1].avatar_url);
+  }));
+
+  it('it should start the timer', fakeAsync(() => {
+    spyOn(component, 'initTimer');
+    component.initTimer();
+    expect(component.initTimer).toHaveBeenCalled();
+    tick(1000);
+    fixture.detectChanges();
+    expect(component.labelTimerElapsed).toEqual('0');
+    component.timerSubscription.unsubscribe();
+  }));
+
+  it('it should stop running timer', fakeAsync(() => {
+    spyOn(component, 'destroyTimer');
+    component.destroyTimer();
+    expect(component.destroyTimer).toHaveBeenCalled();
+    tick(1000);
+    fixture.detectChanges();
+    expect(component.labelTimerElapsed).toEqual('0');
+    component.timerSubscription.unsubscribe();
+  }));
 });

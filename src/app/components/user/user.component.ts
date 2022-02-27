@@ -60,7 +60,7 @@ export class UserComponent implements OnInit, OnDestroy {
     this.githubService.getAllUsers(lastId).subscribe({
       next: (data: any) => {
         this.userData = data;
-
+        console.log('data ', data);
         // Get the highest UserId in the list of users, and use that
         // as offset in the next request
         this.maxUserId = Math.max(...data.map((user: any) => user.id));
@@ -79,6 +79,7 @@ export class UserComponent implements OnInit, OnDestroy {
 
   /**
    * Reset Initial State
+   * Clear everything including localStorage
    */
   resetData() {
     this.maxUserId = 0;
@@ -89,6 +90,11 @@ export class UserComponent implements OnInit, OnDestroy {
     this.getUserData();
   }
 
+  /**
+   * Fetch the next set of Users
+   * Use the maxId of the lastfetch
+   * Destroy the timer(stop the rxjs timer)
+   */
   goForward() {
     if (this.maxUserId >= 0) {
       this.destroyTimer();
@@ -97,6 +103,7 @@ export class UserComponent implements OnInit, OnDestroy {
   }
   /**
    * Toggle Start/Stop
+   * Set Label(button, counter) if timer is running
    */
   toggleStartStop() {
     this.toggleDidStart = !this.toggleDidStart;
@@ -109,9 +116,9 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Destroy Timer /Destroy Subscription
+   * Destroy Timer/Destroy Subscription
+   * Reset all labels to initial State
    */
-
   destroyTimer() {
     this.timerSubscription.unsubscribe();
     this.labelButtonToggle = 'Start';
@@ -122,7 +129,7 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Lifecycle methods, destroy Subscription(Timer)
+   * Lifecycle method, ngOnDestroy
    */
   ngOnDestroy() {
     this.destroyTimer();
