@@ -60,7 +60,8 @@ export class UserComponent implements OnInit, OnDestroy {
     this.githubService.getAllUsers(lastId).subscribe({
       next: (data: any) => {
         this.userData = data;
-        console.log('data ', data);
+        //  console.log('data ', data);
+        
         // Get the highest UserId in the list of users, and use that
         // as offset in the next request
         this.maxUserId = Math.max(...data.map((user: any) => user.id));
