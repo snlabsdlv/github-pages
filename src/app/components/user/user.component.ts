@@ -59,7 +59,6 @@ export class UserComponent implements OnInit, OnDestroy {
   getUserData(lastId: number = 0) {
     this.githubService.getAllUsers(lastId).subscribe({
       next: (data: any) => {
-        console.log('data ', data);
         this.userData = data;
 
         // Get the highest UserId in the list of users, and use that
@@ -100,7 +99,6 @@ export class UserComponent implements OnInit, OnDestroy {
    * Toggle Start/Stop
    */
   toggleStartStop() {
-    // console.log('toggleStartStop  this.toggleDidStart ', this.toggleDidStart);
     this.toggleDidStart = !this.toggleDidStart;
     this.labelButtonToggle = this.toggleDidStart === true ? 'Stop' : 'Start';
     if (!this.toggleDidStart) {
@@ -108,7 +106,6 @@ export class UserComponent implements OnInit, OnDestroy {
     } else {
       this.initTimer();
     }
-    //  console.log('toggleStartStop  this.toggleDidStart ', this.toggleDidStart);
   }
 
   /**

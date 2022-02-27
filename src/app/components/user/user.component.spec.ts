@@ -42,7 +42,7 @@ describe('UserComponent', () => {
     fixture = TestBed.createComponent(UserComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    // githubService = TestBed.inject(GithubService);
+   
     githubServiceSpy = TestBed.inject(
       GithubService
     ) as jasmine.SpyObj<GithubService>;
