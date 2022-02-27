@@ -1,0 +1,47 @@
+<div class="container" layout="row" layout-align="center center">
+  <mat-list>
+    <ng-container *ngFor="let user of userData">
+      <mat-list-item>
+        <h3 matLine>UserName :: {{ user.login }}</h3>
+        <div matLine>
+          <span *ngIf="user.id % 2 === 0"
+            ><img
+              class="matListAvatar"
+              height="50px"
+              width="50px"
+              src="{{ user.avatar_url }}"
+            />
+          </span>
+          <span *ngIf="user.id % 2 !== 0">{{ user.url }} </span>
+        </div>
+        <div matLine></div>
+        <mat-divider></mat-divider>
+      </mat-list-item>
+    </ng-container>
+  </mat-list>
+</div>
+
+<div class="button-container">
+  <mat-grid-list cols="3" rowHeight="2:1">
+    <mat-grid-tile>
+      <button mat-raised-button color="primary" (click)="resetData()">
+        Reset
+      </button>
+    </mat-grid-tile>
+    <mat-grid-tile
+      ><button mat-raised-button color="accent" (click)="toggleStartStop()">
+        {{ labelButtonToggle }}
+      </button></mat-grid-tile
+    >
+    <mat-grid-tile
+      ><button mat-raised-button color="primary" (click)="goForward()">
+        Forward
+      </button></mat-grid-tile
+    >
+  </mat-grid-list>
+</div>
+<div class="button-container">
+  <mat-grid-list cols="1" rowHeight="20:1">
+    <mat-grid-tile> Time Elapsed {{ labelTimerElapsed }} </mat-grid-tile>
+  </mat-grid-list>
+</div>
